@@ -1,0 +1,7 @@
+#Git ignores these files
+
+*.pyc
+*.*~
+\#*\#
+*.db
+*.sqlite
