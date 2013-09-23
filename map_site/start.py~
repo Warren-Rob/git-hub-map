@@ -7,9 +7,9 @@ class Backend:
   """can use "if-modified-since" statement for updating periodically."""
 
   def __init__(self):
-    self.login = "rforsythe"
+    self.login = "nerraw"
     self.authToken = os.environ["AUTH0"]
-    self.conn = sqlite3.connect("database.db")
+    self.conn = sqlite3.connect("map_site/map_site.db")
 
   def getUserList(self):
     link = "https://api.github.com/users?since={0}"
