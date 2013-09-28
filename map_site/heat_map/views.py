@@ -7,23 +7,25 @@ import requests
 
 def index(request):
   users = User.objects.order_by('-location')
-  users = [User(location='San Francisco', name="Tim", numcommits=2)]#DEBUG
+  users = User.objects.all()[:5]
+  #[User(location='San Francisco', name="Tim", numcommits=2)]#DEBUG
                
   locations = {}
   for user in users:
     
     if user.location not in locations.keys():
       latlon = get_lat_long(user.location)
-      locations[user.location] = {'count': 1}
-      locations[user.location].update(latlon)
-      print (locations)#DEBUG
+      if latlon != None:
+        locations[user.location] = {'count': 1}
+        locations[user.location].update(latlon)
+        #print (locations)#DEBUG
     else:
       locations[user.location]['count'] += 1
 
   locations_json = json.dumps(locations)
   context = {'locations': locations_json}
   print(context)
-  return  render(request, 'heat_map/index.html', context)
+  return render(request, 'heat_map/index.html', context)
 
 def get_lat_long(location):
   print("in it")
@@ -31,8 +33,13 @@ def get_lat_long(location):
   location.replace(' ', '+')
   url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&{}'.format(urlencode({'address':location}))
   r = requests.get(url);
-  coords = r.json()['results'][0]['geometry']['location']
-  return {'lat': coords['lat'], 'lon': coords['lng'] }
+  results = r.json()['results']
+  if len(results) != 0: # address validity check
+    coords = results[0]['geometry']['location']
+    print coords
+    return {'lat': coords['lat'], 'lon': coords['lng'] }
+
+  return None
 
   
   
