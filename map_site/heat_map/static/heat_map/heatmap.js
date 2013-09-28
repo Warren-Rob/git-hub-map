@@ -1,7 +1,7 @@
 var cityCircle;
 
 function initialize() {
-    console.log(cities)
+    console.log(cities);
     var mapOptions = {
 	zoom: 4,
 	center: new google.maps.LatLng(37.09024, -95.712891),
