@@ -1,5 +1,8 @@
 # Django settings for map_site project.
 
+import djcelery
+djcelery.setup_loader()
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -12,7 +15,8 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '/home/nerraw/contest/git-hub-map/map_site/map_site.db',                      # Or path to database file if using sqlite3.
+        'NAME': '/Users/rforsythe/Documents/git-hub-map/map_site/map_site.db',                      # Or path to database file if using sqlite3.
+        # 'NAME': '/home/nerraw/contest/git-hub-map/map_site/map_site.db',                      # Or path to database file if using sqlite3.
         # The following settings are not used with sqlite3:
         'USER': '',
         'PASSWORD': '',
@@ -124,6 +128,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'djcelery',
     'heat_map'
 )
 
