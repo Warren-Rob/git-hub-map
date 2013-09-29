@@ -9,15 +9,15 @@ import requests
 
 def index(request):
   users = User.objects.order_by('-location')
-  users = User.objects.all()[:10]
+  users = User.objects.all()[:500]
 
   for user in users:
     try:
-     loc = Location.objects.get(place=user.location)
+     Location.objects.get(place=user.location)
     except Location.DoesNotExist:
       latlon = get_lat_long(user.location)
       if latlon != None:
-        loc = Location(place=user.location, lon=latlon['lon'],
+        Location(place=user.location, lon=latlon['lon'],
                        lat=latlon['lat']).save()
 
   locations = { }
@@ -26,7 +26,6 @@ def index(request):
 
   locations_json = json.dumps(locations)
   context = {'locations': locations_json}
-  print(context)
   return render(request, 'heat_map/index.html', context)
 
 def get_lat_long(location):
@@ -38,7 +37,7 @@ def get_lat_long(location):
   results = r.json()['results']
   if len(results) != 0: # address validity check
     coords = results[0]['geometry']['location']
-    print coords # debug
+    # print coords # debug
     return {'lat': coords['lat'], 'lon': coords['lng'] }
 
   return None

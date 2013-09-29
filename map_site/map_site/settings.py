@@ -1,8 +1,5 @@
 # Django settings for map_site project.
 
-import djcelery
-djcelery.setup_loader()
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -129,6 +126,7 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'djcelery',
+    'djsupervisor',
     'heat_map'
 )
 
@@ -162,3 +160,22 @@ LOGGING = {
         },
     }
 }
+
+import djcelery
+from datetime import timedelta
+
+from celery.schedules import crontab
+
+djcelery.setup_loader()
+
+BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'database'
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERYBEAT_PIDFILE = '/tmp/celerybeat.pid'
+CELERYBEAT_SCHEDULE = { 
+    'add_users_every_hour': {
+      'task': 'tasks.populateDB',
+      'schedule': timedelta(seconds=60)
+      #'schedule': timedelta(hours=1)
+      }, # add another task here
+    }
