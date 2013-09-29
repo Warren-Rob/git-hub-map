@@ -6,5 +6,10 @@ class User(models.Model):
     location = models.TextField()
     numcommits = models.IntegerField()
 
+class Location(models.Model):
+    place = models.TextField()
+    lon = models.FloatField()
+    lat = models.FloatField()
+
     def __unicode__(self):
         return self.name

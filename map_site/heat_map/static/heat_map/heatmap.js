@@ -1,4 +1,4 @@
-var cityCircle;
+var cityPoint;
 
 function initialize() {
     console.log(cities);
@@ -12,23 +12,18 @@ function initialize() {
 				  mapOptions);
 
     for (var city in cities) {
-	// Construct the circle for each value in citymap. We scale population by 20.
 	console.log(city)
 	var populationOptions = {
-	    strokeColor: '#1783FF',
-	    strokeOpacity: 0.8,
-	    strokeWeight: 2,
-	    fillColor: '#73B4FF',
-	    fillOpacity: 0.35,
-	    map: map,
-	    center: new google.maps.LatLng(cities[city].lat, cities[city].lon),
-	    radius: cities[city].count * 10000
+            map: map,
+            draggable: false,
+            animation: google.maps.Animation.DROP,
+	    position: new google.maps.LatLng(cities[city].lat, 
+                                             cities[city].lon)
 	};
 	console.log(populationOptions)
-	cityCircle = new google.maps.Circle(populationOptions);
+	cityPoint = new google.maps.Marker(populationOptions);
     }
 }
-
 
 google.maps.event.addDomListener(window, 'load', initialize);
 
