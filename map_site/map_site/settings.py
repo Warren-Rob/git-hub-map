@@ -175,7 +175,7 @@ CELERYBEAT_PIDFILE = '/tmp/celerybeat.pid'
 CELERYBEAT_SCHEDULE = { 
     'add_users_every_hour': {
       'task': 'tasks.populateDB',
-      'schedule': timedelta(seconds=60)
-      #'schedule': timedelta(hours=1)
+      #'schedule': timedelta(seconds=60) # debug
+      'schedule': timedelta(hours=1)
       }, # add another task here
     }

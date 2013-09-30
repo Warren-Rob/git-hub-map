@@ -1,6 +1,5 @@
 var cityPoint;
 
-
 function initialize() {
   console.log(cities);
   var mapOptions = {
