@@ -5,7 +5,6 @@ from heat_map.models import User
 """can use "if-modified-since" statement for updating periodically?"""
 
 login = 'rforsythe'
-#authToken = os.environ['AUTH0']
 
 # add "get Commits" task
 # split requests

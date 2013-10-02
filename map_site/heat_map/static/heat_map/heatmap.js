@@ -13,11 +13,14 @@ function initialize() {
 
   for (var city in cities) {
     console.log(city)
+    lat = cities[city].lat
+    lng = cities[city].lon
+
     var populationOptions = {
       map: map,
       draggable: false,
       animation: google.maps.Animation.DROP,
-      position: new google.maps.LatLng(cities[city].lat, cities[city].lon)
+      position: new google.maps.LatLng(lat, lng)
     };
 
     console.log(populationOptions)
@@ -35,7 +38,10 @@ function initialize() {
       });
     }
 
-    addInfoWindow(cityPoint, "debug");
+    // User reverse geocaching to get the city, state
+    // will help to consolidate many of the points
+
+    addInfoWindow(cityPoint, city);
   }
 }
 

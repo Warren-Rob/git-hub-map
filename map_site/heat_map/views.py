@@ -9,20 +9,24 @@ import requests
 
 def index(request):
   users = User.objects.order_by('-location')
-  users = User.objects.all()[:500]
+  users = User.objects.all()
+
+  # natural join?
+  # compare databases
+    # any user.location already in the location db, skip the user
 
   for user in users:
     try:
-     Location.objects.get(place=user.location)
+     Location.objects.get(location=user.location)
     except Location.DoesNotExist:
       latlon = get_lat_long(user.location)
       if latlon != None:
-        Location(place=user.location, lon=latlon['lon'],
-                       lat=latlon['lat']).save()
+        Location(location=user.location, lng=latlon['lon'],
+                 lat=latlon['lat']).save()
 
   locations = { }
   for loc in Location.objects.all():
-    locations.update({loc.place: {'lat': loc.lat, 'lon': loc.lon}})
+    locations.update({loc.location: {'lat': loc.lat, 'lon': loc.lng}})
 
   locations_json = json.dumps(locations)
   context = {'locations': locations_json}

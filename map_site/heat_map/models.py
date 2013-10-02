@@ -1,15 +1,19 @@
 from django.db import models
 
 class User(models.Model):
-    pkey = models.IntegerField(primary_key=True)
-    name = models.TextField()
-    location = models.TextField()
-    numcommits = models.IntegerField()
+  pkey = models.IntegerField(primary_key=True)
+  name = models.TextField()
+  location = models.TextField()
+  numcommits = models.IntegerField()
+
+  def __unicode__(self):
+    return "%s (%s): %d" %(self.name, self.location, self.numcommits)
 
 class Location(models.Model):
-    place = models.TextField()
-    lon = models.FloatField()
-    lat = models.FloatField()
+  location = models.TextField()
+  lat = models.FloatField()
+  lng = models.FloatField()
 
-    def __unicode__(self):
-        return self.name
+  def __unicode__(self):
+    return "%s: (lat: %3.15f, lng: %3.15f)" %(self.name, self.lat, self.lng)
+
