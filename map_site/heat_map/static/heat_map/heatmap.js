@@ -1,34 +1,48 @@
-var cityCircle;
+var cityPoint;
 
 function initialize() {
-    console.log(cities);
-    var mapOptions = {
-	zoom: 4,
-	center: new google.maps.LatLng(37.09024, -95.712891),
-	mapTypeId: google.maps.MapTypeId.TERRAIN
+  console.log(cities);
+  var mapOptions = {
+    zoom: 4,
+    center: new google.maps.LatLng(37.09024, -95.712891),
+    mapTypeId: google.maps.MapTypeId.TERRAIN
+  };
+
+  var map = new google.maps.Map(document.getElementById('map-canvas'),
+                                mapOptions);
+
+  for (var city in cities) {
+    console.log(city)
+    lat = cities[city].lat
+    lng = cities[city].lon
+
+    var populationOptions = {
+      map: map,
+      draggable: false,
+      animation: google.maps.Animation.DROP,
+      position: new google.maps.LatLng(lat, lng)
     };
 
-    var map = new google.maps.Map(document.getElementById('map-canvas'),
-				  mapOptions);
+    console.log(populationOptions)
+    cityPoint = new google.maps.Marker(populationOptions);
 
-    for (var city in cities) {
-	// Construct the circle for each value in citymap. We scale population by 20.
-	console.log(city)
-	var populationOptions = {
-	    strokeColor: '#1783FF',
-	    strokeOpacity: 0.8,
-	    strokeWeight: 2,
-	    fillColor: '#73B4FF',
-	    fillOpacity: 0.35,
-	    map: map,
-	    center: new google.maps.LatLng(cities[city].lat, cities[city].lon),
-	    radius: cities[city].count * 10000
-	};
-	console.log(populationOptions)
-	cityCircle = new google.maps.Circle(populationOptions);
+    function addInfoWindow(marker, message) {
+      var info = message;
+
+      var infoWindow = new google.maps.InfoWindow({
+        content: message
+      });
+
+      google.maps.event.addListener(marker, 'click', function() {
+        infoWindow.open(map, marker);
+      });
     }
+
+    // User reverse geocaching to get the city, state
+    // will help to consolidate many of the points
+
+    addInfoWindow(cityPoint, city);
+  }
 }
 
-
 google.maps.event.addDomListener(window, 'load', initialize);
-

@@ -2,4 +2,12 @@
 
 *.pyc
 *.*~
+<<<<<<< HEAD
 \#*\#
+=======
+\#*\#
+*.sqlite
+*.log
+*.pid
+*.config
+>>>>>>> point_map

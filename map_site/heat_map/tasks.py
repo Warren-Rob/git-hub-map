@@ -1,11 +1,13 @@
 import requests, os
-from celery import task
+from celery.task import task
 from heat_map.models import User
 
 """can use "if-modified-since" statement for updating periodically?"""
 
 login = 'rforsythe'
-authToken = os.environ['AUTH0']
+
+# add "get Commits" task
+# split requests
 
 @task(name='tasks.populateDB')
 def populateDB():
@@ -32,8 +34,9 @@ def populateDB():
         if (loc != None):
           print uname, loc # debug
           u = User(pkey=uid, name=uname, location=loc, numcommits=0)
-          u.save()
+          userList.append(u)
 
+    User.objects.bulk_create(userList)
     lastUserId = int(data[len(data)-1]['id'])
 
 def getUserLocation(user):
