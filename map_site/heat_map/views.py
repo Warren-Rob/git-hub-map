@@ -7,6 +7,8 @@ from django.core import serializers
 import json
 import requests
 
+# index should only load the existing information from the db
+# NOT request the data itself!!
 def index(request):
   users = User.objects.order_by('-location')
   users = User.objects.all()

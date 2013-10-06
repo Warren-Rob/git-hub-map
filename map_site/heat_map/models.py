@@ -1,12 +1,11 @@
 from django.db import models
 
 class User(models.Model):
-  pkey = models.IntegerField(primary_key=True)
-  name = models.TextField()
-  location = models.TextField()
+  name = models.TextField(primary_key=True)
+  location = models.ForeignKey(Location, to_field='location')
 
   def __unicode__(self):
-    return "%s (%s): %d" %(self.name, self.location, self.numcommits)
+    return "%s (%s)" % (self.name, self.location)
 
 class Location(models.Model):
   location = models.TextField()

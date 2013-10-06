@@ -1,49 +1,24 @@
-import requests, os
+import urllib, gzip, json, os
 from celery.task import task
-from heat_map.models import User
+from heat_map.models import User, Location
 
-"""can use "if-modified-since" statement for updating periodically?"""
+@task(name='fetchData')
+def fetch(url):
+  fname = url.split('/')[-1]
+  urllib.urlretrieve(url, fname)
+  content = gzip.open(fname).read()
+  d = json.loads(content)
+  print d
+  print a[1]
 
-login = 'rforsythe'
+  return
+  # download the file from gh archive
 
-# add "get Commits" task
-# split requests
+  # sift through the information and extract the relevant data
+    # will be able to compile a list of usernames from the archive
+    # iterate over each list, get location
+    # with location, query google maps and get lng/lat
+    # attempting to do so in the index will take tons more time!!
 
-@task(name='tasks.populateDB')
-def populateDB():
-  link = "https://api.github.com/users?since={0}"
-  if User.objects.count() == 0:
-    lastUserId = 0
-  else:
-    lastUserId = User.objects.latest('pkey').pkey
-
-  while (True):
-    r = requests.get(link.format(lastUserId), auth=(login, authToken))
-    remaining = int(r.headers["x-ratelimit-remaining"])
-    if remaining == 0:
-      break
-
-    userList = []
-    data = r.json()
-    for userInfo in data:
-      if userInfo["type"] == "User":
-        uid = int(userInfo["id"])
-        uname = userInfo["login"]
-        loc = getUserLocation(uname)
-
-        if (loc != None):
-          print uname, loc # debug
-          u = User(pkey=uid, name=uname, location=loc, numcommits=0)
-          userList.append(u)
-
-    User.objects.bulk_create(userList)
-    lastUserId = int(data[len(data)-1]['id'])
-
-def getUserLocation(user):
-  link = "https://api.github.com/users/{0}".format(user)
-  uinfo = requests.get(link, auth=(login, authToken)).json()
-
-  if 'location' in uinfo and uinfo["location"] != "null":
-    return uinfo['location']
-
-  return None
+url = 'http://data.githubarchive.org/2012-04-11-15.json.gz'
+fetch(url)

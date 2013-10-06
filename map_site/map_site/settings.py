@@ -12,8 +12,8 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'map_site_db', # Or path to database file if using sqlite3.
-        'USER': 'admin',
+        'NAME': 'myDB',
+        'USER': 'root',
         'PASSWORD': 'password',
         'HOST': '',
         'PORT': '',
