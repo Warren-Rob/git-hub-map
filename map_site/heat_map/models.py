@@ -15,3 +15,9 @@ class User(models.Model):
 
   def __unicode__(self):
     return "%d: %s (%s)" % (self.uid, self.name, self.location)
+
+  def __str__(self):
+    return "%d: %s (%s)" % (self.uid, self.name, self.location)
+
+  def __str__(self):
+    return "%d: %s (%s)" % (self.uid, self.name, self.location)

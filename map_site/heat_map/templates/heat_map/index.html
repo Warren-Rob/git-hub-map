@@ -7,11 +7,13 @@
     <script type="text/javascript"
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-RiL3w7qUE8XHDDWn0piunE_68G0uxPI&sensor=false&libraries=visualization">
     </script>
+    <script type="text/javascript" src="{% static 'heat_map/external_libs/heatmapjs/src/heatmap.js' %}"></script>
+    <script type="text/javascript" src="{% static 'heat_map/external_libs/heatmapjs/src/heatmap-gmaps.js' %}"></script>
     <script>
       var cities = {{ locations|safe }};
-      console.log(cities.San_Francisco);
     </script>
     <script type="text/javascript" src="{% static 'heat_map/heatmap.js' %}"></script>
+    
   </head>
   <body>
     <div id="map-canvas"/>
