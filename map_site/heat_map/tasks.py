@@ -1,24 +1,78 @@
-import urllib, gzip, json, os
+import requests, os
+from urllib import urlencode
 from celery.task import task
 from heat_map.models import User, Location
 
-@task(name='fetchData')
-def fetch(url):
-  fname = url.split('/')[-1]
-  urllib.urlretrieve(url, fname)
-  content = gzip.open(fname).read()
-  d = json.loads(content)
-  print d
-  print a[1]
+login = 'robforsythe'
 
-  return
-  # download the file from gh archive
+@task(name='tasks.populateDB')
+def populateDB():
+  link = "https://api.github.com/users?since={0}"
+  if User.objects.count() == 0:
+    lastUserId = 0
+  else:
+    lastUserId = User.objects.latest('uid').uid
 
-  # sift through the information and extract the relevant data
-    # will be able to compile a list of usernames from the archive
-    # iterate over each list, get location
-    # with location, query google maps and get lng/lat
-    # attempting to do so in the index will take tons more time!!
+  while (True):
+    r = requests.get(link.format(lastUserId), auth=(login, authToken))
+    remaining = int(r.headers["x-ratelimit-remaining"])
+    if remaining == 0:
+      break
 
-url = 'http://data.githubarchive.org/2012-04-11-15.json.gz'
-fetch(url)
+    userList = []
+    data = r.json()
+    for userInfo in data:
+      if userInfo["type"] == "User":
+        uid = int(userInfo["id"])
+        uname = userInfo["login"]
+        loc = getUserLocation(uname)
+
+        print uname
+        print loc
+
+        # loc will always return a location
+        u = User(uid=uid, name=uname, location=loc)
+        userList.append(u)
+
+    User.objects.bulk_create(userList)
+    lastUserId = int(data[len(data)-1]['id'])
+
+# first, get the location that the user provides (1)
+# next, get the coordinates that google maps returns (2)
+# last, store & return the location object (4)
+def getUserLocation(user):
+  # (1)
+  link = "https://api.github.com/users/{0}".format(user)
+  uinfo = requests.get(link, auth=(login, authToken)).json()
+
+  if 'location' in uinfo and uinfo["location"] != None:
+    loc = uinfo['location']
+  else:
+    loc = 'Antarctica'
+
+  # (2)
+  lat_long = {}
+  loc.replace(' ', '+')
+  link = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&{}'
+  url = link.format(urlencode({'address':loc.encode('utf-8')}))
+  r = requests.get(url)
+
+  # this will include lat and lng
+  results = r.json()['results']
+
+  if len(results) != 0: # address validity check
+    coords = results[0]['geometry']['location']
+    pos = {'lat': coords['lat'], 'lng': coords['lng'] }
+  else: 
+    # placeholder - Antarctica!
+    pos = {'lat': -82.862751899999992, 'lng': -135.000000000000000}
+
+  # (4)
+  try:
+    l = Location.objects.get(lat=pos['lat'], lng=pos['lng'])
+  except Location.DoesNotExist:
+    l = Location(location=loc, lat=pos['lat'], lng=pos['lng'])
+    l.save()
+
+  return l
+

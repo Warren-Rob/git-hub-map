@@ -15,6 +15,7 @@ function initialize() {
     console.log(city)
     lat = cities[city].lat
     lng = cities[city].lon
+    users = cities[city].users //array
 
     var populationOptions = {
       map: map,
@@ -38,10 +39,10 @@ function initialize() {
       });
     }
 
-    // User reverse geocaching to get the city, state
-    // will help to consolidate many of the points
-
-    addInfoWindow(cityPoint, city);
+    str = "<b>Users from " + city + ":</b> </br>";
+    for (var u in users) { str += "> " + users[u].login + "</br>"; }
+    console.log(str);
+    addInfoWindow(cityPoint, str);
   }
 }
 

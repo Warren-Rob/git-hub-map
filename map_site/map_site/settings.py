@@ -171,9 +171,8 @@ CELERY_RESULT_BACKEND = 'database'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYBEAT_PIDFILE = '/tmp/celerybeat.pid'
 CELERYBEAT_SCHEDULE = { 
-    'add_users_every_hour': {
+    'populate_database': {
       'task': 'tasks.populateDB',
-      #'schedule': timedelta(seconds=60) # debug
       'schedule': timedelta(hours=1)
       }, # add another task here
     }

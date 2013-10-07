@@ -7,43 +7,24 @@ from django.core import serializers
 import json
 import requests
 
-# index should only load the existing information from the db
-# NOT request the data itself!!
+# index should only load the existing information 
+# from the db, NOT request the data itself
 def index(request):
-  users = User.objects.order_by('-location')
-  users = User.objects.all()
+  locationList = { }
+  for place in Location.objects.all():
+    # get all users with this location
+    # return them in a list via dict
 
-  # natural join?
-  # compare databases
-    # any user.location already in the location db, skip the user
+    userList = { }
+    users = User.objects.filter(location = place.location)
+    for u in users:
+      userList.update({ u.uid: {'login': u.name }})
 
-  for user in users:
-    try:
-     Location.objects.get(location=user.location)
-    except Location.DoesNotExist:
-      latlon = get_lat_long(user.location)
-      if latlon != None:
-        Location(location=user.location, lng=latlon['lon'],
-                 lat=latlon['lat']).save()
+    locationList.update({place.location: {'lat': place.lat, 
+                                          'lon': place.lng, 
+                                          'users': userList
+                                         }})
 
-  locations = { }
-  for loc in Location.objects.all():
-    locations.update({loc.location: {'lat': loc.lat, 'lon': loc.lng}})
-
-  locations_json = json.dumps(locations)
+  locations_json = json.dumps(locationList)
   context = {'locations': locations_json}
   return render(request, 'heat_map/index.html', context)
-
-def get_lat_long(location):
-  #print("in it")
-  lat_long = {}
-  location.replace(' ', '+')
-  url = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&{}'.format(urlencode({'address':location.encode('utf-8')}))
-  r = requests.get(url);
-  results = r.json()['results']
-  if len(results) != 0: # address validity check
-    coords = results[0]['geometry']['location']
-    # print coords # debug
-    return {'lat': coords['lat'], 'lon': coords['lng'] }
-
-  return None
