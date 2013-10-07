@@ -27,6 +27,9 @@ def populateDB():
         uname = userInfo["login"]
         loc = getUserLocation(uname)
 
+        if loc == None:
+          break
+
         print uname
         print loc
 
@@ -39,7 +42,7 @@ def populateDB():
 
 # first, get the location that the user provides (1)
 # next, get the coordinates that google maps returns (2)
-# last, store & return the location object (4)
+# last, store & return the location object (3)
 def getUserLocation(user):
   # (1)
   link = "https://api.github.com/users/{0}".format(user)
@@ -50,29 +53,35 @@ def getUserLocation(user):
   else:
     loc = 'Antarctica'
 
-  # (2)
-  lat_long = {}
-  loc.replace(' ', '+')
-  link = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&{}'
-  url = link.format(urlencode({'address':loc.encode('utf-8')}))
-  r = requests.get(url)
-
-  # this will include lat and lng
-  results = r.json()['results']
-
-  if len(results) != 0: # address validity check
-    coords = results[0]['geometry']['location']
-    pos = {'lat': coords['lat'], 'lng': coords['lng'] }
-  else: 
-    # placeholder - Antarctica!
-    pos = {'lat': -82.862751899999992, 'lng': -135.000000000000000}
-
-  # (4)
   try:
-    l = Location.objects.get(lat=pos['lat'], lng=pos['lng'])
+    l = Location.objects.get(location = loc)
   except Location.DoesNotExist:
-    l = Location(location=loc, lat=pos['lat'], lng=pos['lng'])
-    l.save()
+    # (2)
+    lat_long = {}
+    loc.replace(' ', '+')
+    link = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&{}'
+    url = link.format(urlencode({'address':loc.encode('utf-8')}))
+    r = requests.get(url)
+
+    if r.headers['status'] == 'OVER_QUERY_LIMIT':
+      return None
+
+    # this will include lat and lng
+    results = r.json()['results']
+
+    if len(results) != 0: # address validity check
+      coords = results[0]['geometry']['location']
+      pos = {'lat': coords['lat'], 'lng': coords['lng'] }
+    else: 
+      # placeholder - Antarctica!
+      pos = {'lat': -82.862751899999992, 'lng': -135.000000000000000}
+
+    # (3)
+    try:
+      l = Location.objects.get(lat=pos['lat'], lng=pos['lng'])
+    except Location.DoesNotExist:
+      l = Location(location=loc, lat=pos['lat'], lng=pos['lng'])
+      l.save()
 
   return l
 

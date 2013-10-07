@@ -1,4 +1,5 @@
 var cityPoint;
+var infoWindow = new google.maps.InfoWindow({content: '' });
 
 function initialize() {
   console.log(cities);
@@ -30,18 +31,15 @@ function initialize() {
     function addInfoWindow(marker, message) {
       var info = message;
 
-      var infoWindow = new google.maps.InfoWindow({
-        content: message
-      });
-
       google.maps.event.addListener(marker, 'click', function() {
+        infoWindow.setContent(message);
         infoWindow.open(map, marker);
       });
     }
 
     str = "<b>Users from " + city + ":</b> </br>";
     for (var u in users) { str += "> " + users[u].login + "</br>"; }
-    console.log(str);
+
     addInfoWindow(cityPoint, str);
   }
 }

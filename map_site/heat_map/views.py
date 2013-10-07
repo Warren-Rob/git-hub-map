@@ -17,8 +17,9 @@ def index(request):
 
     userList = { }
     users = User.objects.filter(location = place.location)
+
     for u in users:
-      userList.update({ u.uid: {'login': u.name }})
+      userList.update({u.uid: {'login': u.name }})
 
     locationList.update({place.location: {'lat': place.lat, 
                                           'lon': place.lng, 
