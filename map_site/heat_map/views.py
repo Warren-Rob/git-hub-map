@@ -12,6 +12,8 @@ import requests
 def index(request):
   locationList = { }
   for place in Location.objects.all():
+    if place.location == 'Antarctica':
+      continue
     # get all users with this location
     # return them in a list via dict
 

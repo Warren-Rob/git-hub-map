@@ -4,6 +4,7 @@ from celery.task import task
 from heat_map.models import User, Location
 
 login = 'robforsythe'
+authToken = 'b4439ecc6eca48565539a136219326c48c9feed4'
 
 @task(name='tasks.populateDB')
 def populateDB():
@@ -62,9 +63,11 @@ def getUserLocation(user):
     link = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&{}'
     url = link.format(urlencode({'address':loc.encode('utf-8')}))
     r = requests.get(url)
-
-    if r.headers['status'] == 'OVER_QUERY_LIMIT':
-      return None
+    #print r.headers
+    
+    # need a limit check
+    #if r.headers['status'] == 'OVER_QUERY_LIMIT':
+    #  return None
 
     # this will include lat and lng
     results = r.json()['results']
@@ -72,7 +75,7 @@ def getUserLocation(user):
     if len(results) != 0: # address validity check
       coords = results[0]['geometry']['location']
       pos = {'lat': coords['lat'], 'lng': coords['lng'] }
-    else: 
+    else:
       # placeholder - Antarctica!
       pos = {'lat': -82.862751899999992, 'lng': -135.000000000000000}
 

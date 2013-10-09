@@ -6,7 +6,7 @@ class Location(models.Model):
   lng = models.FloatField()
 
   def __unicode__(self):
-    return "%s: (lat: %3.15f, lng: %3.15f)" %(self.location, self.lat, self.lng)
+    return "%s: (lat: %3.15f, lng: %3.15f)" % (self.location, self.lat, self.lng)
 
 class User(models.Model):
   uid = models.IntegerField(primary_key=True)
