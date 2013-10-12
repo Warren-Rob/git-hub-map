@@ -1,23 +1,38 @@
-import requests, urllib, gzip, json, os
+import requests, gzip, json, os
 from datetime import datetime
 from celery.task import task
+from urllib import urlencode, urlretrieve
 from heat_map.models import User, Location
 
 login = 'robforsythe'
 
-# take input array, get login
-# from login, get location
-# from location, reverse geocode & get coords
-### we don't need the location call to github here, it 
-### is part of the event call - is ID necessary?
-@task(name='tasks.parse')
-def parse():
-  # returns [year, month, day, hour]
+@task(name='tasks.addEvents')
+def addEvents():
   time = getDate()
 
   GHlink = 'http://data.githubarchive.org/{0}-{1}-{2}-{3}.json.gz'
   url = GHlink.format(time[0], time[1], time[2], time[3])
-  arr = fetch(url)
+  events = fetchJSON(url)
+
+  for e in events:
+    etype = e['type']
+
+    if validEvent(etype):
+      actor = e['actor']
+      repo = e['repository']
+
+      if etype == 'CreateEvent':
+        return;
+      elif etype == 'IssuesEvent':
+        return;
+      elif etype == 'PushEvent':
+        return;
+      else:
+        return;
+
+
+      r = Repo(rid=repo['id'], name=repo['name'], owner=repo['owner'])
+
 
   link = 'https://api.github.com/users/{0}'
   newUsers = []
@@ -46,30 +61,28 @@ def parse():
           loc = 'Antarctica' 
 
           # returns { staticLocation, latitude, longitude }
-        staticLoc = getLocation(loc)
+        location = getLocation(loc)
         u = User(uid=uid, name=uname, location=staticLoc)
         newUsers.append(u)
 
   User.objects.bulk_create(newUsers)
-
 
 def getDate():
   yr = str(datetime.now().year)
   mo = str(datetime.now().month)
   if len(mo) != 2:
     mo = '0' + mo
-  day = str(datetime.now().day - 1)
+  day = str(datetime.now().day)
   if len(day) != 2:
     day = '0' + day
-  hr = str(datetime.now().hour)
+  hr = str(datetime.now().hour - 3)
 
   return [yr, mo, day, hr]
 
-# returns arr of json elements
-def fetch(url):
-  #print url
+
+def fetchJSON(url):
   fname = url.split('/')[-1]
-  urllib.urlretrieve(url, fname)
+  urlretrieve(url, fname)
   content = gzip.open(fname).read()
 
   jsons = []
@@ -79,38 +92,35 @@ def fetch(url):
 
   return jsons
 
-# using the location that the user input
-# need to get a static location name in addition to the coordinates
-# any invalid locations or null fields get sent to Antarctica
+def validEvent(event):
+  return {
+          'CreateEvent': True,
+          'ForkEvent': True,
+          'IssuesEvent': True,
+          'PublicEvent': True,
+          'PullRequestEvent': True,
+          'PushEvent': True,
+          'ReleaseEvent': True,
+          'WatchEvent': True,
+          }.get(event, False)
+
 def getLocation(userInputLoc):
-  lat_long = {}
   userInputLoc.replace(' ', '+')
-  link = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&{}' 
-  url = link.format(urllib.urlencode({'address':userInputLoc.encode('utf-8')}))
+
+  link = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&{}'
+  url = link.format(urlencode({'address':userInputLoc.encode('utf-8')}))
   r = requests.get(url)
 
-  # this will include lat and lng
   results = r.json()['results']
-  
-  if len(results) != 0: # address validity check
+
+  if len(results) != 0:
     coords = results[0]['geometry']['location']
     pos = {'lat': coords['lat'], 'lng': coords['lng'] }
   else:
-    # placeholder
-    pos = {'lat': '90.0000', 'lng': '0.0000'}
-
-  link = 'http://maps.googleapis.com/maps/api/geocode/json?latlng={0},{1}&sensor=false'
-  r = requests.get(link.format(pos['lat'], pos['lng']))
-  geoInfo = r.json()
-  potentialAddresses = geoInfo['results'][0]['address_components']
-  if len(potentialAddresses) != 0:
-    staticLoc = geoInfo['results'][0]['address_components'][0]
-    name = staticLoc['long_name']
-  else:
-    name = 'Antarctica'
+    pos = {'lat': -82.862751899999992, 'lng': -135.000000000000000}
 
   try:
-    l = Location.objects.get(location=name)
+    l = Location.objects.get(lat=pos['lat'], lng=pos['lng'])
   except Location.DoesNotExist:
     l = Location(location=name, lat=pos['lat'], lng=pos['lng'])
     l.save()

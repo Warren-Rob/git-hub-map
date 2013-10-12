@@ -4,7 +4,6 @@ from celery.task import task
 from heat_map.models import User, Location
 
 login = 'robforsythe'
-authToken = 'b4439ecc6eca48565539a136219326c48c9feed4'
 
 @task(name='tasks.populateDB')
 def populateDB():
@@ -31,10 +30,6 @@ def populateDB():
         if loc == None:
           break
 
-        print uname
-        print loc
-
-        # loc will always return a location
         u = User(uid=uid, name=uname, location=loc)
         userList.append(u)
 
@@ -58,16 +53,13 @@ def getUserLocation(user):
     l = Location.objects.get(location = loc)
   except Location.DoesNotExist:
     # (2)
-    lat_long = {}
     loc.replace(' ', '+')
-    link = 'http://maps.googleapis.com/maps/api/geocode/json?sensor=false&{}'
+    link ='http://maps.googleapis.com/maps/api/geocode/json?sensor=false&{}'
     url = link.format(urlencode({'address':loc.encode('utf-8')}))
     r = requests.get(url)
-    #print r.headers
-    
-    # need a limit check
-    #if r.headers['status'] == 'OVER_QUERY_LIMIT':
-    #  return None
+
+    if r.headers['status'] == 'OVER_QUERY_LIMIT':
+      return None
 
     # this will include lat and lng
     results = r.json()['results']
@@ -75,7 +67,7 @@ def getUserLocation(user):
     if len(results) != 0: # address validity check
       coords = results[0]['geometry']['location']
       pos = {'lat': coords['lat'], 'lng': coords['lng'] }
-    else:
+    else: 
       # placeholder - Antarctica!
       pos = {'lat': -82.862751899999992, 'lng': -135.000000000000000}
 
