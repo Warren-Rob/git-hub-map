@@ -19,6 +19,7 @@ class User(models.Model):
   def __str__(self):
     return "%d: %s (%s)" % (self.uid, self.name, self.location)
 
+<<<<<<< HEAD
 class Repo(models.Model):
   rid = models.IntegerField(primary_key=True)
   name = models.TextField()
@@ -44,3 +45,7 @@ class IssuesEvent(models.Model):
 class PushEvent(models.Model):
   event = models.ForeignKey(Event);
   ref = models.TextField();
+=======
+  def __repr__(self):
+    return "%d: %s (%s)" % (self.uid, self.name, self.location)
+>>>>>>> c5175731e0c4e20efa8ab6d88c59620dfb26de37
