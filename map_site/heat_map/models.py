@@ -6,7 +6,10 @@ class Location(models.Model):
   lng = models.FloatField()
 
   def __unicode__(self):
-    return "%s: (lat: %3.15f, lng: %3.15f)" %(self.location, self.lat, self.lng)
+    return "%s: (lat: %3.15f, lng: %3.15f)" % (self.location, self.lat, self.lng)
+
+  def __repr__(self):
+    return "%s: (lat: %3.15f, lng: %3.15f)" % (self.location, self.lat, self.lng)
 
 class User(models.Model):
   uid = models.IntegerField(primary_key=True)
@@ -16,36 +19,40 @@ class User(models.Model):
   def __unicode__(self):
     return "%d: %s (%s)" % (self.uid, self.name, self.location)
 
-  def __str__(self):
+  def __repr__(self):
     return "%d: %s (%s)" % (self.uid, self.name, self.location)
 
-<<<<<<< HEAD
 class Repo(models.Model):
   rid = models.IntegerField(primary_key=True)
   name = models.TextField()
-  owner = models.TextField()
+  owner = models.ForeignKey(User)
 
-  def unicode(self):
-    return "%s (%d) owned by %s" % (self.name, self.rid, self.owner);
+  def __unicode__(self):
+    return "%s (%d) owned by %s" % (self.name, self.rid, self.owner)
+
+  def __repr__(self):
+    return "%s (%d) owned by %s" % (self.name, self.rid, self.owner)
 
 # Fork, Public, PullRequest, Release, Watch
 class Event(models.Model):
-  actor = models.ForeignKey(User);
-  repo = models.ForeignKey(Repo);
+  actor = models.ForeignKey(User)
+  repo = models.ForeignKey(Repo)
+  etype = models.TextField()
 
 class CreateEvent(models.Model):
-  event = models.ForeignKey(Event);
-  ctype = models.TextField(); # repo / branch / tag
+  actor = models.ForeignKey(User)
+  repo = models.ForeignKey(Repo)
+  ctype = models.TextField() # repo / branch / tag
 
 class IssuesEvent(models.Model):
-  event = models.ForeignKey(Event);
-  action = models.TextField();
-  issue = models.TextField();
+  actor = models.ForeignKey(User)
+  repo = models.ForeignKey(Repo)
+  created_at = models.TextField()
+  action = models.TextField()
+  issue = models.TextField()
 
 class PushEvent(models.Model):
-  event = models.ForeignKey(Event);
-  ref = models.TextField();
-=======
-  def __repr__(self):
-    return "%d: %s (%s)" % (self.uid, self.name, self.location)
->>>>>>> c5175731e0c4e20efa8ab6d88c59620dfb26de37
+  actor = models.ForeignKey(User)
+  repo = models.ForeignKey(Repo)
+  ref = models.TextField()
+

@@ -7,14 +7,9 @@ from django.core import serializers
 import json
 import requests
 
-# index should only load the existing information 
-# from the db, NOT request the data itself
 def index(request):
   locationList = { }
   for place in Location.objects.all():
-    # get all users with this location
-    # return them in a list via dict
-
     if place.location == 'Antarctica':
       continue
 

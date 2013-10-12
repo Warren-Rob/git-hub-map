@@ -12,7 +12,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', 
-        'NAME': 'myDB',
+        'NAME': 'mapDB',
         'USER': 'root',
         'PASSWORD': 'password',
         'HOST': '',
