@@ -2,52 +2,35 @@ import requests, gzip, json, os
 from datetime import datetime
 from celery.task import task
 from urllib import urlencode, urlretrieve
-from heat_map.models import User, Location, Repo, Event, CreateEvent, IssuesEvent, PushEvent
+from heat_map.models import User, Location, Repo, PushEvent
 
-login = 'robforsythe'
-
+# from heat_map.tasks import addEvents
 @task(name='tasks.addEvents')
 def addEvents():
   events = fetchJSON()
 
   for e in events:
-    if validEvent(e['type']) and 'repository' in e:
-      u = saveUser(e['actor'])
+    if e['type'] == 'PushEvent' and 'repository' in e:
+      u = saveUser(e['actor_attributes'])
+      r = saveRepo(e['repository'])
+      ref = e['payload']['ref']
+      size = e['payload']['size']
 
-      if u == -1:
-        break
-      elif u == 0:
-        continue
-      else:
-        r = saveRepo(e['repository'])
-        saveEvent(e, u, r)
+      p = PushEvent(actor=u, repo=r, ref=ref, size=size)
+      p.save()
 
 
-def saveUser(actor):
+def saveUser(actor_attrs):
   try:
-    u = User.objects.get(name=actor)
+    u = User.objects.get(name=actor_attrs['login'])
   except User.DoesNotExist:
-    link = 'https://api.github.com/users/{0}'
-    r = requests.get(link.format(actor), auth=(login, authToken))
-    remaining = int(r.headers["x-ratelimit-remaining"])
-
-    # how do we guarantee we extract all of the information?
-    # switch login/auth? save position in file?
-    if remaining == 0:
-      print '***************OUT OF REQUESTS***************\n' * 3
-      return None
-
-    data = r.json()
-
-    uid = data["id"]
-
-    if 'location' in data and data['location'] != None:
-      loc = data['location']
+    if 'location' in actor_attrs and actor_attrs['location'] != None:
+      loc = actor_attrs['location']
     else:
       loc = 'Antarctica'
 
     location = getLocation(loc)
-    u = User(uid=uid, name=actor, location=location)
+    u = User(name=actor_attrs['login'], location=location)
     u.save()
 
   return u
@@ -62,44 +45,15 @@ def saveRepo(repo):
     rname = repo['name']
     rowner = repo['owner']
 
-    user = saveUser(rowner)
-
-    r = Repo(rid=rid, name=rname, owner=user)
+    r = Repo(rid=rid, name=rname, owner=rowner)
     r.save()
 
   return r
 
 
-def saveEvent(event, user, repo):
-  etype = event['type']
-
-  if etype == 'CreateEvent':
-    ctype = event['payload']['ref_type']
-
-    c = CreateEvent(actor=user, repo=repo, ctype=ctype)
-    c.save()
-
-  elif etype == 'IssuesEvent':
-    t = event['created_at']
-    a = event['payload']['action']
-    i = event['payload']['issue']
-
-    i = IssuesEvent(actor=user, repo=repo, created_at=t, action=a, issue=i)
-    i.save()
-
-  elif etype == 'PushEvent':
-    ptype = event['payload']['ref']
-
-    p = PushEvent(actor=user, repo=repo, ref=ptype)
-    p.save()
-
-  else:
-    e = Event(actor=user, repo=repo, etype=etype)
-    e.save()
-
-
 # soonest we can get is 3 hours back (PST)
 # library for time calculations? (Babel, pytz)
+# (needed for end of day/month/year)
 def getDate():
   yr = str(datetime.now().year)
   mo = str(datetime.now().month)
@@ -135,21 +89,7 @@ def fetchJSON():
   return jsons
 
 
-def validEvent(event):
-  return {
-          'CreateEvent': True,
-          'ForkEvent': True,
-          'IssuesEvent': True,
-          'PublicEvent': True,
-          'PullRequestEvent': True,
-          'PushEvent': True,
-          'ReleaseEvent': True,
-          'WatchEvent': True,
-          }.get(event, False)
-
-
 def getLocation(userLocation):
-
   try:
     l = Location.objects.get(location=userLocation)
   except Location.DoesNotExist:

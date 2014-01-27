@@ -12,7 +12,6 @@ class Location(models.Model):
     return "%s: (lat: %3.15f, lng: %3.15f)" % (self.location, self.lat, self.lng)
 
 class User(models.Model):
-  uid = models.IntegerField(primary_key=True)
   name = models.TextField()
   location = models.ForeignKey(Location)
 
@@ -22,10 +21,11 @@ class User(models.Model):
   def __repr__(self):
     return "%d: %s (%s)" % (self.uid, self.name, self.location)
 
+# owner no longer FK - don't want to use github api to get UID
 class Repo(models.Model):
   rid = models.IntegerField(primary_key=True)
   name = models.TextField()
-  owner = models.ForeignKey(User)
+  owner = models.TextField()
 
   def __unicode__(self):
     return "%s (%d) owned by %s" % (self.name, self.rid, self.owner)
@@ -33,26 +33,9 @@ class Repo(models.Model):
   def __repr__(self):
     return "%s (%d) owned by %s" % (self.name, self.rid, self.owner)
 
-# Fork, Public, PullRequest, Release, Watch
-class Event(models.Model):
-  actor = models.ForeignKey(User)
-  repo = models.ForeignKey(Repo)
-  etype = models.TextField()
-
-class CreateEvent(models.Model):
-  actor = models.ForeignKey(User)
-  repo = models.ForeignKey(Repo)
-  ctype = models.TextField() # repo / branch / tag
-
-class IssuesEvent(models.Model):
-  actor = models.ForeignKey(User)
-  repo = models.ForeignKey(Repo)
-  created_at = models.TextField()
-  action = models.TextField()
-  issue = models.TextField()
-
 class PushEvent(models.Model):
   actor = models.ForeignKey(User)
   repo = models.ForeignKey(Repo)
   ref = models.TextField()
+  size = models.IntegerField() # number of commits
 

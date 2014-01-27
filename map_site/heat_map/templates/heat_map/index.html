@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title> GitHub Map! </title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" type="text/css" href="{% static 'heat_map/heatmap.css' %}" />
     <script type="text/javascript"
@@ -13,7 +14,6 @@
       var cities = {{ locations|safe }};
     </script>
     <script type="text/javascript" src="{% static 'heat_map/heatmap.js' %}"></script>
-    
   </head>
   <body>
     <div id="map-canvas"/>

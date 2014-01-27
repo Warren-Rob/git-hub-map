@@ -14,15 +14,21 @@ def index(request):
       continue
 
     userList = { }
-    users = User.objects.filter(location = place.location)
+    usersAtPlace = User.objects.filter(location = place.location)
 
-    for u in users:
-      userList.update({u.uid: {'login': u.name }})
+    # still necessary? no more UID
+    i = 0
+    for u in usersAtPlace:
+      userList.update({ i : u.name })
+      i = i + 1
 
-    locationList.update({place.location: {'lat': place.lat, 
-                                          'lon': place.lng, 
-                                          'users': userList
-                                         }})
+    locationList.update({
+      place.location: {
+        'lat': place.lat,
+        'lon': place.lng,
+        'users': userList
+        }
+      })
 
   locations_json = json.dumps(locationList)
   context = {'locations': locations_json}

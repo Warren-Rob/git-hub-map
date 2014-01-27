@@ -11,7 +11,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', 
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mapDB',
         'USER': 'root',
         'PASSWORD': 'password',
@@ -123,6 +123,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'jquery',
     'djcelery',
     'djsupervisor',
     'heat_map'
@@ -161,18 +162,21 @@ LOGGING = {
 
 import djcelery
 from datetime import timedelta
-
 from celery.schedules import crontab
 
 djcelery.setup_loader()
 
 BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'database'
+BROKER_TRANSPORT_OPTIONS = {
+    'visibility_timeout': 60, # 1 minute
+    'fanout_prefix': True
+    }
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERYBEAT_PIDFILE = '/tmp/celerybeat.pid'
-CELERYBEAT_SCHEDULE = { 
+CELERYBEAT_SCHEDULE = {
     'populate_database': {
-      'task': 'tasks.populateDB',
+      'task': 'tasks.addEvents',
       'schedule': timedelta(hours=1)
       }, # add another task here
     }
