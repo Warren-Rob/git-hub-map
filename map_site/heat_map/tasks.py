@@ -33,6 +33,7 @@ def saveUser(actor_attrs):
     u = User(name=actor_attrs['login'], location=location)
     u.save()
 
+  print u
   return u
 
 
@@ -52,12 +53,12 @@ def saveRepo(repo):
 
 
 def getDate():
-  threeHrsAgo = datetime.datetime.now() - datetime.timedelta(hours=3)
+  fiveHrsAgo = datetime.datetime.now() - datetime.timedelta(hours=5)
 
-  yr = str(threeHrsAgo.year)
-  mo = str(threeHrsAgo.month)
-  day = str(threeHrsAgo.day)
-  hr = str(threeHrsAgo.hour)
+  yr = str(fiveHrsAgo.year)
+  mo = str(fiveHrsAgo.month)
+  day = str(fiveHrsAgo.day)
+  hr = str(fiveHrsAgo.hour)
 
   if len(mo) != 2:
     mo = '0' + mo
@@ -88,6 +89,7 @@ def fetchJSON():
   return jsons
 
 
+# google maps api maxes out at 2500 requests
 def getLocation(userLocation):
   try:
     l = Location.objects.get(location=userLocation)
@@ -104,7 +106,7 @@ def getLocation(userLocation):
       coords = results[0]['geometry']['location']
       pos = {'lat': coords['lat'], 'lng': coords['lng'] }
     else:
-      pos = {'lat': -82.862751899999992, 'lng': -135.000000000000000}
+      pos = {'lat': -74.156075, 'lng': 32.7197089}
 
     try:
       l = Location.objects.get(lat=pos['lat'], lng=pos['lng'])
