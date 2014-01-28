@@ -1,5 +1,5 @@
+import datetime
 import requests, gzip, json, os
-from datetime import datetime
 from celery.task import task
 from urllib import urlencode, urlretrieve
 from heat_map.models import User, Location, Repo, PushEvent
@@ -51,20 +51,19 @@ def saveRepo(repo):
   return r
 
 
-# soonest we can get is 3 hours back (PST)
-# library for time calculations? (Babel, pytz)
-# (needed for end of day/month/year)
 def getDate():
-  yr = str(datetime.now().year)
-  mo = str(datetime.now().month)
+  threeHrsAgo = datetime.datetime.now() - datetime.timedelta(hours=3)
+
+  yr = str(threeHrsAgo.year)
+  mo = str(threeHrsAgo.month)
+  day = str(threeHrsAgo.day)
+  hr = str(threeHrsAgo.hour)
+
   if len(mo) != 2:
     mo = '0' + mo
 
-  day = str(datetime.now().day - 1)
   if len(day) != 2:
     day = '0' + day
-
-  hr = str(datetime.now().hour)
 
   return [yr, mo, day, hr]
 
